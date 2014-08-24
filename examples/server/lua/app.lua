@@ -1,23 +1,13 @@
 local lapis = require("lapis")
 local app = lapis.Application()
-local config = require("lapis.config")
+local config = require("app.config")
 local models = require('app.models.models')
 local handlers = require('app.handlers')
 local json_params = require("lapis.application").json_params
-local post_wrapper = require("app.lib.request").post_wrapper
+local model_injector = require("app.lib.request").model_injector
 
-
-config({ "development", "production" }, {
-    session_name = "satellizer",
-    secret = "this is my secret string 123456",
-    token_time = (3600 * 24 * 7)
-})
-
-
-app:get("/", function()
-    return "Welcome to Lapis " .. require("lapis.version")
-end)
-
-app:post("/auth/signup", post_wrapper(json_params(handlers.auth_user), models.Users))
+app:post("/auth/signup", model_injector(json_params(handlers.auth_user), models.Users))
+app:post("/auth/login", model_injector(json_params(handlers.auth_login), models.Users))
+app:put("/api/me", model_injector(json_params(handlers.api_me), models.Users))
 
 return app
